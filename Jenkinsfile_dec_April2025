@@ -10,7 +10,7 @@ pipeline{
 		stage('1CloneCode'){
 			steps{
               sh "echo 'cloning the latest application version' "
-              git "https://github.com/LandmakTechnology/maven-web-application"				
+              git "https://github.com/TESLA-CLASS28-DEVELOPERS/maven-web-application"				
 			}
 		}
 		stage('2test+build'){
