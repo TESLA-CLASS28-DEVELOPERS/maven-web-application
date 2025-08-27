@@ -1,0 +1,83 @@
+pipeline{
+    agent any    
+    //options{}
+    //triggers{}
+    tools{
+        maven 'maven3.9.11'
+    }
+    stages{
+        stage('1.CloneCode'){
+            steps{
+                sh "echo cloning the latest app code from github"
+                git 'https://github.com/TESLA-CLASS28-DEVELOPERS/maven-web-application'
+            }
+        }
+        stage('2.mvnBuild'){
+            steps{
+                sh "echo validate, compile, and run UnitTesting"
+                sh "echo UnitTesting must pass our CodeQuality gateway for artifacts to be created"
+                sh "mvn clean package"
+            }
+        }
+        stage('3.CodeQuality'){
+            steps{
+                sh "mvn sonar:sonar"
+                sh "echo running CodeQuality analysis"
+                sh "echo CodeQuality analysis completed and report generated"                
+            }
+        }
+        stage('4.UploadArtifacts'){
+            steps{
+                sh "mvn deploy"
+                sh "echo artifacts being uploaded in artifactory repo"
+                sh "echo artifacts successfully uploaded in artifactory repo- nexus"        
+                
+            }
+        }
+        stage('5.Deploy2UAT'){
+            steps{
+                sh "echo Deployment is ready for client review"
+                sh "echo Deploying application to UAT using container plugin"
+                deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcatAccess', path: '', url: 'http://3.143.169.190:8080/')], contextPath: null, war: 'target/*war'
+            }
+        }
+        stage('6.ManualApproval'){
+            steps{
+                sh "echo Please review and confirm within 5 Days"
+                timeout(time:5, unit:'DAYS'){
+                input message: 'Application ready for deployment. Kindly review and approve'
+                }
+            }
+        }
+        stage('7.Deploy2Prod'){
+            steps{
+                sh "echo Application reviewed, approved and ready for the market"
+                deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcatAccess', path: '', url: 'http://3.143.169.190:8080/')], contextPath: null, war: 'target/*war'
+            }
+        }
+    }
+    
+    post{
+        always{
+            emailext body: '''Hi Team,
+
+Deployment status
+
+Engr. Christopher Ijeoma''', recipientProviders: [developers(), contributor(), buildUser()], subject: 'Deployment status', to: 'ikechukwu.ijeoma79@gmail.com'
+        }
+        success{
+            emailext body: '''Hi Team,
+
+Deployment successful
+
+Engr. Christopher Ijeoma''', recipientProviders: [developers(), contributor(), buildUser()], subject: 'Deployment status', to: 'ikechukwu.ijeoma79@gmail.com'
+        }
+        failure{
+            emailext body: '''Hi Team,
+
+Deployment failed
+
+Engr. Christopher Ijeoma''', recipientProviders: [developers(), contributor(), buildUser()], subject: 'Deployment status', to: 'ikechukwu.ijeoma79@gmail.com'
+        }
+    }
+}
