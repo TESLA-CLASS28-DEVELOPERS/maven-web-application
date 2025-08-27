@@ -1,7 +1,7 @@
 pipeline{
 	agent any 
 	tools {
-		maven 'maven399'
+		maven 'maven3.9.11'
 		//node  'node2.15'
 	}
 	//options {} 
@@ -37,7 +37,7 @@ pipeline{
 		stage('5Deploy2UAT'){
 			steps{
 			  sh "echo deploying to UAT"
-              deploy adapters: [tomcat9(credentialsId: 'tomcatAccess', path: '', url: 'http://54.234.37.143:9077/')], contextPath: null, war: 'target/*war'
+              deploy adapters: [tomcat9(credentialsId: 'tomcatAccess', path: '', url: 'http://3.143.169.190:8080/')], contextPath: null, war: 'target/*war'
 			}
 		}
 		stage('6ManualApproval'){
@@ -52,7 +52,7 @@ pipeline{
 		stage('7Deploy2Prod'){
 			steps{
 			  sh "echo deploying apps to production/market"
-              deploy adapters: [tomcat9(credentialsId: 'tomcatAccess', path: '', url: 'http://54.234.37.143:9077/')], contextPath: null, war: 'target/*war'
+              deploy adapters: [tomcat9(credentialsId: 'tomcatAccess', path: '', url: 'http://3.143.169.190:8080/')], contextPath: null, war: 'target/*war'
 			}
 
 		}
